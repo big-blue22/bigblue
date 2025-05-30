@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事業環境分析インタラクティブ学習</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices:
+    Five Forces: HTML/CSS diagram, click-to-reveal details (JS). Goal: Inform, Organize.
+    Market Size (TAM/SAM/SOM): Text definitions. Interactive SAM calculator (HTML form, JS for calculation). Goal: Inform, Calculate.
+    Positioning Map: Text explanation. Chart.js scatter plot for Green Tea example (Canvas). Goal: Inform, Compare, Organize. Axes selection could be simple dropdowns updating labels.
+    Direct/Indirect Competitors: Structured HTML lists/tables. Goal: Inform, Compare.
+    SWOT: Text explanation. Goal: Inform.
+    All textual content from the lecture is integrated into relevant sections.
+    Interactions: Click to reveal, input for calculation, chart display.
+    Justification: Enhance understanding of business frameworks through direct interaction and visualization, making abstract concepts more tangible.
+    Library/Method: Vanilla JS, Chart.js (Canvas).
+    -->
+    <style>
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+        .tab-button { transition: all 0.3s ease; }
+        .tab-button.active { border-color: #0284c7; color: #0284c7; background-color: #e0f2fe; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .force-box { cursor: pointer; transition: all 0.3s ease; border-width: 2px; }
+        .force-box:hover { transform: translateY(-5px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .details-panel {
+            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .details-panel.open {
+            display: block;
+            max-height: 1000px; /* Adjust as needed */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Example max-width */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px; /* Height for md screens and up */
+            }
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 24px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 700px;
+            border-radius: 0.5rem;
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-neutral-800 antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-amber-700">事業環境分析インタラクティブ学習</h1>
+            <p class="mt-2 text-neutral-600">講義内容を基にした、実践的な分析アプローチの理解を深めるためのツールです。</p>
+        </header>
+
+        <nav class="mb-8 flex flex-wrap justify-center gap-2 sm:gap-4">
+            <button data-tab="five-forces" class="tab-button active text-sm sm:text-base font-medium py-2 px-3 sm:px-4 rounded-md border-b-2 border-transparent hover:bg-sky-100 hover:text-sky-700">5F分析</button>
+            <button data-tab="market-size" class="tab-button text-sm sm:text-base font-medium py-2 px-3 sm:px-4 rounded-md border-b-2 border-transparent hover:bg-sky-100 hover:text-sky-700">市場規模分析</button>
+            <button data-tab="competitor-analysis" class="tab-button text-sm sm:text-base font-medium py-2 px-3 sm:px-4 rounded-md border-b-2 border-transparent hover:bg-sky-100 hover:text-sky-700">競合状況分析</button>
+            <button data-tab="swot-analysis" class="tab-button text-sm sm:text-base font-medium py-2 px-3 sm:px-4 rounded-md border-b-2 border-transparent hover:bg-sky-100 hover:text-sky-700">SWOT分析</button>
+            <button data-tab="conclusion" class="tab-button text-sm sm:text-base font-medium py-2 px-3 sm:px-4 rounded-md border-b-2 border-transparent hover:bg-sky-100 hover:text-sky-700">まとめ</button>
+        </nav>
+
+        <main>
+            <section id="five-forces" class="content-section active bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-amber-700 mb-4">1. 新規参入機会の分析 (ファイブフォース分析)</h2>
+                <p class="mb-6 text-neutral-700 leading-relaxed">新しい事業を始める際、その市場（業界）が魅力的かどうかを分析するフレームワークです。マイケル・ポーター教授が提唱したもので、業界の収益性を決定する5つの競争要因を分析します。各要因をクリックして詳細を確認しましょう。</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 items-center justify-center">
+                    <div></div>
+                    <div id="force-new-entrants" class="force-box border-sky-500 p-4 rounded-lg text-center bg-sky-50 hover:bg-sky-100">
+                        <h3 class="font-semibold text-sky-700">新規参入の脅威</h3>
+                    </div>
+                    <div></div>
+
+                    <div id="force-suppliers" class="force-box border-teal-500 p-4 rounded-lg text-center bg-teal-50 hover:bg-teal-100 md:col-start-1">
+                        <h3 class="font-semibold text-teal-700">売り手の交渉力</h3>
+                    </div>
+                    <div id="force-rivalry" class="force-box border-red-500 p-4 rounded-lg text-center bg-red-50 hover:bg-red-100">
+                        <h3 class="font-semibold text-red-700">業界内の競合</h3>
+                    </div>
+                    <div id="force-buyers" class="force-box border-indigo-500 p-4 rounded-lg text-center bg-indigo-50 hover:bg-indigo-100">
+                        <h3 class="font-semibold text-indigo-700">買い手の交渉力</h3>
+                    </div>
+                    
+                    <div></div>
+                    <div id="force-substitutes" class="force-box border-purple-500 p-4 rounded-lg text-center bg-purple-50 hover:bg-purple-100 md:col-start-2">
+                        <h3 class="font-semibold text-purple-700">代替品の脅威</h3>
+                    </div>
+                    <div></div>
+                </div>
+                
+                <div id="force-details-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-button" onclick="closeModal('force-details-modal')">&times;</span>
+                        <h3 id="modal-title" class="text-xl font-semibold text-amber-700 mb-3"></h3>
+                        <div id="modal-overview" class="text-neutral-700 mb-2"></div>
+                        <div id="modal-factors" class="text-sm text-neutral-600 leading-relaxed"></div>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold text-amber-600 mt-8 mb-3">【演習1】大学内でカフェ事業を立ち上げる魅力度分析</h3>
+                <p class="mb-4 text-neutral-700">皆さんの大学内でカフェ事業を立ち上げると仮定し、上記のファイブフォースの観点から、その事業が魅力的かどうかを考えてみましょう。</p>
+                <button id="show-cafe-analysis" class="bg-sky-600 hover:bg-sky-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">講師の分析を見る</button>
+                <div id="cafe-analysis-details" class="details-panel mt-4 p-4 bg-stone-50 rounded-md border border-stone-200">
+                    <h4 class="font-semibold text-neutral-700 mb-2">講師によるまとめと考察:</h4>
+                    <ul class="list-disc list-inside text-neutral-600 space-y-1 text-sm">
+                        <li>大学内でのカフェ事業は、ある意味で守られた環境（外部の大手チェーンが簡単には参入できない）である。</li>
+                        <li>買い手である学生の価格感度は高く、学食やコンビニといった強力な代替品も多い。</li>
+                        <li>供給企業の交渉力は比較的弱い。</li>
+                        <li>新規参入の脅威も限定的かもしれないが、油断はできない（学内の他の団体など）。</li>
+                        <li>総合的に見ると、成功のためには何らかの「差別化戦略」が不可欠。</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="market-size" class="content-section bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-amber-700 mb-4">2. 市場規模の分析 (TAM・SAM・SOM)</h2>
+                <p class="mb-6 text-neutral-700 leading-relaxed">新しい事業を始める際、その市場が全体としてどれくらいの大きさなのかを把握することが重要です。TAM・SAM・SOMという考え方で市場規模を捉えます。</p>
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-sky-700">TAM (Total Addressable Market：総獲得可能市場)</h3>
+                        <p class="text-neutral-600 text-sm">ある製品やサービスがアプローチし得る、理論上の最大の市場規模。潜在的な顧客全体。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-sky-700">SAM (Serviceable Available Market：サービス提供可能市場)</h3>
+                        <p class="text-neutral-600 text-sm">TAMのうち、自社のビジネスモデル等で現実にアプローチできる市場規模。ターゲット顧客層の市場。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-sky-700">SOM (Serviceable Obtainable Market：獲得可能市場)</h3>
+                        <p class="text-neutral-600 text-sm">SAMのうち、実際に自社が獲得できると現実的に見込まれる市場規模。事業計画の売上目標の根拠。</p>
+                    </div>
+                </div>
+                <p class="mb-4 text-neutral-700">特に事業計画では「SAM」を正確に見積もることが重要です。基本的な算出方法は以下の通りです：<br><code class="bg-stone-200 p-1 rounded text-sm">SAM = ターゲット顧客数 × 顧客1人あたりの平均購入単価 × 平均購入頻度（年間など）</code></p>
+
+                <h3 class="text-xl font-semibold text-amber-600 mt-8 mb-3">【演習2】大学内カフェ事業のSAM算出</h3>
+                <p class="mb-4 text-neutral-700">皆さんのキャンパスのカフェ事業の年間SAMを試算してみましょう。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <div class="bg-stone-50 p-4 rounded-md border border-stone-200">
+                        <h4 class="font-semibold text-neutral-700 mb-3">SAM計算ツール:</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label for="customer-count" class="block text-sm font-medium text-neutral-600">ターゲット顧客数（人）:</label>
+                                <input type="number" id="customer-count" value="1925" class="mt-1 block w-full p-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="avg-spend" class="block text-sm font-medium text-neutral-600">平均購入単価（円/回）:</label>
+                                <input type="number" id="avg-spend" value="500" class="mt-1 block w-full p-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="purchase-freq" class="block text-sm font-medium text-neutral-600">年間平均購入頻度（回/年）:</label>
+                                <input type="number" id="purchase-freq" value="150" class="mt-1 block w-full p-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm">
+                            </div>
+                            <button id="calculate-sam" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">SAMを計算する</button>
+                            <div id="sam-result" class="mt-3 text-lg font-semibold text-amber-700"></div>
+                        </div>
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-md border border-stone-200">
+                        <h4 class="font-semibold text-neutral-700 mb-2">講師による試算例:</h4>
+                        <p class="text-sm text-neutral-600 mb-1">前提：在籍者数3,500人、日常的滞在者数1,925人 (55%)、単価500円、年間開校日数150日</p>
+                        <p class="text-lg font-semibold text-neutral-700">SAM ≈ 1億4,400万円</p>
+                        <p class="mt-3 text-xs text-neutral-500">（1925人 × 500円 × 150日）</p>
+                        <h4 class="font-semibold text-neutral-700 mt-4 mb-2">他のグループの試算例（講義より）:</h4>
+                        <ul class="list-disc list-inside text-xs text-neutral-600 space-y-0.5">
+                            <li>A: 9,000万円</li>
+                            <li>B: 約4,200万円</li>
+                            <li>G: 1億5,360万円</li>
+                        </ul>
+                         <p class="mt-2 text-xs text-neutral-500">重要なのは前提条件とその納得感です。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="competitor-analysis" class="content-section bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-amber-700 mb-4">3. 競合状況の分析</h2>
+                <p class="mb-6 text-neutral-700 leading-relaxed">市場の魅力度と規模を把握したら、次は競合他社の状況を分析します。「ポジショニングマップ」や「直接・間接競合」の理解が重要です。</p>
+                
+                <h3 class="text-xl font-semibold text-amber-600 mb-3">ポジショニングマップ（知覚マップ）</h3>
+                <p class="text-neutral-700 mb-2 text-sm">市場における自社と競合他社のポジションを客観的に把握し、独自性や競争優位性を明確化する手法です。顧客が重視する購買決定要因（KBF）から2つの軸を選定し、マップ上に各社を配置します。</p>
+                <p class="text-neutral-700 mb-1 text-sm font-semibold">軸の例:</p>
+                <ul class="list-disc list-inside text-sm text-neutral-600 mb-4 space-y-0.5">
+                    <li>価格（高価格 ⇔ 低価格）</li>
+                    <li>品質（高品質 ⇔ 低品質）</li>
+                    <li>機能性（多機能 ⇔ 単機能）</li>
+                    <li>デザイン（先進的 ⇔ 伝統的）</li>
+                </ul>
+                <p class="text-neutral-700 mb-4 text-sm">空白地帯（ブルーオーシャン）や競合密集地帯（レッドオーシャン）の発見に繋がります。</p>
+
+                <h4 class="text-lg font-semibold text-neutral-700 mb-2">具体例：ペットボトル緑茶市場のポジショニングマップ（仮）</h4>
+                <p class="text-sm text-neutral-600 mb-3">軸1：製法へのこだわり度（低⇔高）、軸2：ボトルのデザイン性（伝統的⇔モダン）と仮定した場合のイメージです。</p>
+                <div class="chart-container bg-stone-50 p-2 rounded-md border border-stone-200">
+                    <canvas id="positioningMapChart"></canvas>
+                </div>
+
+                <h3 class="text-xl font-semibold text-amber-600 mt-8 mb-3">競合の捉え方：直接競合と間接競合</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-stone-50 p-4 rounded-md border border-stone-200">
+                        <h4 class="text-lg font-semibold text-sky-700 mb-2">直接競合</h4>
+                        <p class="text-sm text-neutral-600 mb-2">自社とほぼ同等の製品/サービスを提供し、同一市場・同一顧客ニーズで競争する企業。</p>
+                        <p class="text-xs text-neutral-500 font-medium">例：</p>
+                        <ul class="list-disc list-inside text-xs text-neutral-600">
+                            <li>ラーメン屋 ⇔ 他のラーメン屋</li>
+                            <li>日産 ⇔ トヨタ、ホンダ</li>
+                        </ul>
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-md border border-stone-200">
+                        <h4 class="text-lg font-semibold text-teal-700 mb-2">間接競合</h4>
+                        <p class="text-sm text-neutral-600 mb-2">異なる製品/サービスだが、顧客の同じニーズを満たし、予算や時間を奪い合う企業。</p>
+                         <p class="text-xs text-neutral-500 font-medium">例：</p>
+                        <ul class="list-disc list-inside text-xs text-neutral-600">
+                            <li>書店 ⇔ 電子書籍、映画館 (余暇の過ごし方)</li>
+                            <li>大学内カフェ ⇔ 図書館 (勉強場所として)</li>
+                        </ul>
+                    </div>
+                </div>
+                 <p class="mt-4 text-sm text-neutral-700">幅広い視野で競合を捉えることが重要です。</p>
+            </section>
+
+            <section id="swot-analysis" class="content-section bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-amber-700 mb-4">4. 市場の機会と脅威の分析 (SWOT分析)</h2>
+                <p class="mb-6 text-neutral-700 leading-relaxed">自社を取り巻く外部環境の「機会 (Opportunities)」と「脅威 (Threats)」、そして内部環境の「強み (Strengths)」と「弱み (Weaknesses)」を整理・分析するフレームワークです。ファイブフォース分析の結果もSWOTの要素となり得ます。</p>
+                <div class="bg-stone-50 p-4 rounded-md border border-stone-200">
+                    <h4 class="font-semibold text-neutral-700 mb-2">大学内カフェ運営の場合の例:</h4>
+                    <p class="text-sm font-medium text-sky-700">機会:</p>
+                    <ul class="list-disc list-inside text-sm text-neutral-600 mb-2">
+                        <li>学生の口コミによる集客効果</li>
+                        <li>大学行事との連携企画</li>
+                    </ul>
+                    <p class="text-sm font-medium text-red-700">脅威:</p>
+                    <ul class="list-disc list-inside text-sm text-neutral-600">
+                        <li>長期休暇中の集客減</li>
+                        <li>学生の嗜好の変化の速さ</li>
+                    </ul>
+                </div>
+                <p class="mt-4 text-sm text-neutral-700">本講義では概要のみですが、戦略立案に非常に有効なツールです。</p>
+            </section>
+
+            <section id="conclusion" class="content-section bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-amber-700 mb-4">まとめ：競合分析で最も重要なこと</h2>
+                <p class="mb-6 text-neutral-700 leading-relaxed">様々な分析フレームワークを学びましたが、最も重要なのは「<strong class="text-amber-700">常にお客様を見ること</strong>」です。競合に囚われすぎると、顧客不在の製品やサービスを生み出す危険性があります。</p>
+                <div class="space-y-4">
+                    <div class="bg-stone-50 p-4 rounded-md border-l-4 border-amber-500">
+                        <p class="text-sm text-neutral-600">電気ポット市場でのティファールの成功例や、サントリー「伊右衛門」や「天然水」の顧客視点への転換は、この重要性を示しています。</p>
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-md border-l-4 border-amber-500">
+                        <p class="text-sm text-neutral-600">キリンビールの経営者も「競合に目を奪われるとイノベーションは生まれない」と述べています。</p>
+                    </div>
+                </div>
+                <p class="mt-6 text-neutral-700 font-semibold">事業の本質は、常にお客様を見つめ、そのニーズに応えることです。</p>
+            </section>
+        </main>
+
+        <footer class="mt-12 pt-8 border-t border-stone-300 text-center">
+            <p class="text-sm text-neutral-500">&copy; 事業環境分析インタラクティブ学習SPA. All rights reserved.</p>
+        </footer>
+    </div>
+
+<script>
+    const tabs = document.querySelectorAll('.tab-button');
+    const sections = document.querySelectorAll('.content-section');
+    const forceBoxes = document.querySelectorAll('.force-box');
+    const modal = document.getElementById('force-details-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalOverview = document.getElementById('modal-overview');
+    const modalFactors = document.getElementById('modal-factors');
+
+    const forceData = {
+        'force-new-entrants': {
+            title: '新規参入の脅威',
+            overview: '新たな企業がその業界に参入してくる可能性や、参入の容易さ。',
+            factors: `<strong>高まる要因:</strong><br>
+                      - 参入障壁の低さ（初期投資少、許認可不要など）<br>
+                      <strong>低まる要因 (参入障壁が高いケース):</strong><br>
+                      - 規模の経済性・ブランド力（既存企業が有利）<br>
+                      - 流通チャネルの確保（既存企業が有利）<br>
+                      - 政府の規制や特許`
+        },
+        'force-suppliers': {
+            title: '売り手の交渉力（供給企業の交渉力）',
+            overview: '部品や原材料の供給業者が価格引き上げ等を要求する力。',
+            factors: `<strong>強まる要因:</strong><br>
+                      - 供給業者の集中度・独自性（インテル、ソニーのカメラ部品など）<br>
+                      - 切り替えコストが高い場合<br>
+                      <strong>弱まる要因:</strong><br>
+                      - 供給業者の特定業界への販売依存度が高い場合`
+        },
+        'force-rivalry': {
+            title: '業界内の競合（既存企業間の敵対関係）',
+            overview: '業界内の競合企業間の競争の激しさ。',
+            factors: `<strong>激化する要因:</strong><br>
+                      - 競合企業の数が多い<br>
+                      - 製品・サービスの類似性が高い（差別化困難）<br>
+                      - 業界の成長率が低い（既存顧客の奪い合い）`
+        },
+        'force-buyers': {
+            title: '買い手の交渉力',
+            overview: '製品やサービスの買い手（顧客）が価格引き下げ等を要求する力。',
+            factors: `<strong>強まる要因:</strong><br>
+                      - 買い手の集中度（少数または大口顧客）<br>
+                      - 製品の標準化（コモディティ化、他社への切り替え容易）<br>
+                      - 内製化の可能性`
+        },
+        'force-substitutes': {
+            title: '代替品の脅威',
+            overview: '既存製品/サービスの代わりとなり得る、異なる製品/サービスが登場する脅威。',
+            factors: `<strong>高まる要因:</strong><br>
+                      - 代替品の価格が低い、または性能が高い<br>
+                      - 代替品への切り替えコストが低い<br>
+                      - 代替品の存在による業界全体の収益性低下の可能性`
+        }
+    };
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const targetSectionId = tab.dataset.tab;
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetSectionId) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+
+    function openModal(title, overview, factors) {
+        modalTitle.textContent = title;
+        modalOverview.textContent = overview;
+        modalFactors.innerHTML = factors;
+        modal.style.display = "block";
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    forceBoxes.forEach(box => {
+        box.addEventListener('click', () => {
+            const data = forceData[box.id];
+            if (data) {
+                openModal(data.title, data.overview, data.factors);
+            }
+        });
+    });
+    
+    const showCafeAnalysisButton = document.getElementById('show-cafe-analysis');
+    const cafeAnalysisDetails = document.getElementById('cafe-analysis-details');
+    showCafeAnalysisButton.addEventListener('click', () => {
+        cafeAnalysisDetails.classList.toggle('open');
+        showCafeAnalysisButton.textContent = cafeAnalysisDetails.classList.contains('open') ? '分析を隠す' : '講師の分析を見る';
+    });
+
+    const calculateSamButton = document.getElementById('calculate-sam');
+    const samResultDiv = document.getElementById('sam-result');
+    calculateSamButton.addEventListener('click', () => {
+        const customerCount = parseFloat(document.getElementById('customer-count').value) || 0;
+        const avgSpend = parseFloat(document.getElementById('avg-spend').value) || 0;
+        const purchaseFreq = parseFloat(document.getElementById('purchase-freq').value) || 0;
+        const sam = customerCount * avgSpend * purchaseFreq;
+        samResultDiv.textContent = `推定SAM: ${sam.toLocaleString()} 円`;
+    });
+
+    // Positioning Map Chart
+    const ctxPosMap = document.getElementById('positioningMapChart')?.getContext('2d');
+    if (ctxPosMap) {
+        const positioningMapChart = new Chart(ctxPosMap, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'お～いお茶 (伊藤園)',
+                    data: [{ x: 3, y: 2 }], // 仮の値: こだわり度3, デザイン伝統的2
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    pointRadius: 8,
+                    pointHoverRadius: 10
+                }, {
+                    label: '伊右衛門 (サントリー)',
+                    data: [{ x: 4, y: 3 }], // 仮の値: こだわり度4, デザイン中間3
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointRadius: 8,
+                    pointHoverRadius: 10
+                }, {
+                    label: '綾鷹 (コカ・コーラ)',
+                    data: [{ x: 5, y: 2.5 }], // 仮の値: こだわり度5, デザインやや伝統的2.5
+                    backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    pointRadius: 8,
+                    pointHoverRadius: 10
+                }, {
+                    label: '生茶 (キリン)',
+                    data: [{ x: 3.5, y: 4.5 }], // 仮の値: こだわり度3.5, デザインモダン4.5
+                    backgroundColor: 'rgba(153, 102, 255, 0.8)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    pointRadius: 8,
+                    pointHoverRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '製法へのこだわり度 (低 1 → 高 5)' // 16文字以内を意識
+                        },
+                        min: 0,
+                        max: 6
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'デザイン性 (伝統 1 → モダン 5)' // 16文字以内を意識
+                        },
+                        min: 0,
+                        max: 6
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += `(こだわり度 ${context.parsed.x}, デザイン性 ${context.parsed.y})`;
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'bottom',
+                         labels: {
+                            font: {
+                                size: 10 
+                            },
+                            boxWidth: 15,
+                            padding: 10
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Default to first tab
+    tabs[0].click();
+
+</script>
+</body>
+</html>
