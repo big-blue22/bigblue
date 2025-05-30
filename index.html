@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI技術動向調査サマリー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --primary-color: #0ea5e9; /* sky-500 */
+            --secondary-color: #6366f1; /* indigo-500 */
+            --text-primary: #1e293b;   /* slate-800 */
+            --text-secondary: #334155; /* slate-700 */
+            --bg-light: #f8fafc;     /* slate-50 */
+            --bg-white: #ffffff;
+            --border-color: #e2e8f0; /* slate-200 */
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            overflow-x: hidden; /* Prevent horizontal scroll on the body */
+        }
+        .font-serif {
+            font-family: 'Noto Serif JP', serif;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        .section-title-underline {
+            position: relative;
+            padding-bottom: 0.75rem; /* pb-3, reduced for mobile */
+            margin-bottom: 2rem; /* mb-8, reduced for mobile */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .section-title-underline {
+                padding-bottom: 1rem; /* pb-4 */
+                margin-bottom: 2.5rem; /* mb-10 */
+            }
+        }
+        .section-title-underline::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px; /* Adjusted for mobile */
+            height: 4px; /* Adjusted for mobile */
+            background-color: var(--primary-color);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .section-title-underline::after {
+                 width: 60px;
+                 height: 5px;
+            }
+        }
+        .section-title-underline:hover::after {
+            width: 70px; /* Adjusted for mobile */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .section-title-underline:hover::after {
+                width: 90px;
+            }
+        }
+        .card {
+            background-color: var(--bg-white);
+            border-radius: 1rem; /* rounded-2xl */
+            box-shadow: 0 8px 16px -4px rgba(0,0,0,0.05), 0 4px 8px -4px rgba(0,0,0,0.04);
+            transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-8px) scale(1.015); /* Slightly reduced hover effect for mobile */
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .card:hover {
+                transform: translateY(-10px) scale(1.02);
+            }
+        }
+
+        .toc {
+            background-color: var(--bg-white);
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 8px 16px -4px rgba(0,0,0,0.05);
+            padding: 0.75rem; /* p-3 */
+        }
+        .toc a {
+            transition: all 0.25s ease-in-out;
+            display: flex;
+            align-items: center;
+            padding: 0.625rem 1rem; /* p-2.5 px-4, slightly reduced for mobile */
+            border-radius: 0.5rem; /* rounded-lg */
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .toc a {
+                 padding: 0.75rem 1.25rem; /* p-3 px-5 */
+            }
+        }
+        .toc a:hover {
+            color: var(--primary-color);
+            background-color: #f0f9ff; /* sky-50 */
+            padding-left: 1.25rem; /* px-5 on hover, adjusted */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .toc a:hover {
+                padding-left: 1.5rem; /* px-6 on hover */
+            }
+        }
+        .toc-active {
+            color: var(--secondary-color) !important;
+            background-color: #e0e7ff !important; /* indigo-100 */
+            font-weight: 700 !important;
+            padding-left: 1.5rem !important; /* px-6 for active, adjusted */
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .toc-active {
+                 padding-left: 1.75rem !important; /* px-7 for active */
+            }
+        }
+        .toc-active i {
+            color: var(--secondary-color) !important;
+            transform: scale(1.1);
+        }
+        .toc-icon {
+            margin-right: 0.75rem; /* mr-3, adjusted */
+            font-size: 1.25rem; /* text-lg, adjusted */
+            color: #94a3b8; /* slate-400 */
+            transition: transform 0.2s ease;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .toc-icon {
+                 margin-right: 0.875rem; /* mr-3.5 */
+                 font-size: 1.375rem; /* text-xl + */
+            }
+        }
+        .toc a:hover .toc-icon {
+            color: var(--primary-color);
+        }
+
+        .prose-custom {
+            font-size: 1rem; /* Base font size for mobile */
+            line-height: 1.75; /* Adjusted line height for mobile */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .prose-custom {
+                font-size: 1.1rem; 
+                line-height: 1.85;
+            }
+        }
+        .prose-custom p {
+            margin-bottom: 1.5em; /* Adjusted for mobile */
+            color: var(--text-secondary);
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .prose-custom p {
+                margin-bottom: 1.75em;
+            }
+        }
+        .prose-custom ul,
+        .prose-custom ol {
+            margin-bottom: 1.5em; /* Adjusted for mobile */
+            color: var(--text-secondary);
+            padding-left: 1.5em; /* Adjusted for mobile */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .prose-custom ul,
+            .prose-custom ol {
+                margin-bottom: 1.75em;
+                padding-left: 1.85em;
+            }
+        }
+        .prose-custom strong {
+            font-weight: 700; 
+            color: var(--text-primary);
+        }
+        .prose-custom h2 {
+            font-size: 1.75rem; /* Adjusted for mobile */
+            font-weight: 700;
+            margin-top: 2.5rem; /* mt-10, adjusted */
+            margin-bottom: 0.75rem; /* mb-3, adjusted */
+            font-family: 'Noto Serif JP', serif;
+            letter-spacing: -0.01em; /* Adjusted */
+            color: var(--text-primary);
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .prose-custom h2 {
+                font-size: 2rem;
+            }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .prose-custom h2 {
+                font-size: 2.5rem;
+                 margin-top: 3.5rem; /* mt-14 */
+                 margin-bottom: 1rem;
+                 letter-spacing: -0.02em;
+            }
+        }
+        .prose-custom h3 {
+            font-size: 1.5rem; /* Adjusted for mobile */
+            font-weight: 700;
+            margin-top: 2rem; /* mt-8, adjusted */
+            margin-bottom: 1rem; /* mb-4, adjusted */
+            font-family: 'Noto Serif JP', serif;
+            color: #27272a; /* zinc-800 */
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .prose-custom h3 {
+                font-size: 1.75rem;
+            }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .prose-custom h3 {
+                font-size: 2rem;
+                margin-top: 3rem; /* mt-12 */
+                margin-bottom: 1.5rem; /* mb-6 */
+                letter-spacing: -0.01em;
+            }
+        }
+         .prose-custom h4 {
+            font-size: 1.125rem; /* text-lg, adjusted for mobile */
+            font-weight: 600;
+            margin-top: 1.75rem; /* mt-7, adjusted */
+            margin-bottom: 0.75rem; /* mb-3, adjusted */
+            color: var(--secondary-color);
+         }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .prose-custom h4 {
+                font-size: 1.25rem;
+            }
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .prose-custom h4 {
+                font-size: 1.375rem;
+                margin-top: 2.5rem; /* mt-10 */
+                margin-bottom: 1rem; /* mb-4 */
+            }
+         }
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .scroll-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card-icon-bg {
+            position: absolute;
+            top: -20px; /* Adjusted */
+            right: -20px; /* Adjusted */
+            font-size: 70px; /* Adjusted for mobile */
+            color: var(--primary-color);
+            opacity: 0.07;
+            z-index: 0;
+            transform: rotate(-20deg);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .card-icon-bg {
+                top: -25px;
+                right: -25px;
+                font-size: 90px;
+            }
+        }
+        .card:hover .card-icon-bg {
+            transform: rotate(-10deg) scale(1.1);
+            opacity: 0.1;
+        }
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+        .table-container th, .table-container td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* p-3 sm:p-4, adjusted */
+            font-size: 0.875rem; /* text-sm, adjusted for mobile */
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+             .table-container th, .table-container td {
+                padding: 1rem 1.25rem; /* p-4 px-5 */
+                font-size: 0.9375rem; /* slightly smaller than 1rem */
+            }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .table-container th, .table-container td {
+                padding: 1.125rem 1.375rem; /* p-4/5 */
+                font-size: 1rem;
+            }
+        }
+        .table-container th {
+            background-color: #f1f5f9; /* slate-100 */
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .callout-box {
+            background-color: #fff7ed; /* orange-50 */
+            border-left: 4px solid #fb923c; /* orange-400, slightly thinner border */
+            padding: 1rem 1.25rem; /* p-4 md:p-5, adjusted */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-top: 1.5rem; /* mt-6, adjusted */
+            margin-bottom: 1.5rem; /* mb-6, adjusted */
+            box-shadow: 0 2px 8px rgba(251, 146, 60, 0.1);
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .callout-box {
+                border-left-width: 5px;
+                padding: 1.25rem 1.75rem; /* p-5 md:p-7 */
+                margin-top: 2rem; /* mt-8 */
+                margin-bottom: 2rem; /* mb-8 */
+            }
+        }
+        .callout-box h4 {
+            color: #c2410c; /* orange-700 */
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 0.625rem; /* mb-2.5, adjusted */
+            display: flex;
+            align-items: center;
+            font-size: 1.125rem; /* text-lg, adjusted */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .callout-box h4 {
+                 margin-bottom: 0.875rem; /* mb-3.5 */
+                 font-size: 1.25rem; /* text-xl */
+            }
+        }
+        .callout-box h4 i {
+            margin-right: 0.5rem; /* mr-2, adjusted */
+            font-size: 1.3em; /* Adjusted */
+            color: #ea580c; /* orange-600 */
+        }
+         @media (min-width: 768px) { /* md breakpoint */
+            .callout-box h4 i {
+                margin-right: 0.625rem; /* mr-2.5 */
+                font-size: 1.5em;
+            }
+        }
+        .callout-box ul {
+            list-style-type: disc;
+            padding-left: 1.25rem; /* pl-5, adjusted */
+            color: #9a3412; /* orange-800 */
+            font-size: 0.875rem; /* text-sm, adjusted */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .callout-box ul {
+                padding-left: 1.5rem; /* pl-6 */
+                font-size: 0.95rem;
+            }
+        }
+        .callout-box ul li::marker {
+            color: #fb923c; /* orange-400 */
+        }
+        .typewriter-text {
+            overflow: hidden;
+            white-space: nowrap;
+            letter-spacing: .05em;
+            display: inline-block;
+        }
+        .hero-subtitle {
+            opacity: 0;
+            transition: opacity 1s ease-in-out 0.5s;
+        }
+        .hero-subtitle.visible {
+            opacity: 1;
+        }
+        .scroll-down-icon {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+            animation: bounce 2s infinite ease-in-out;
+            cursor: pointer;
+        }
+        .scroll-down-icon.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        .decorative-shape {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out alternate;
+        }
+        .shape1 { top: 5%; left: 10%; width: 80px; height: 80px; animation-duration: 18s; opacity: 0.5;} /* Smaller for mobile */
+        .shape2 { bottom: 10%; right: 5%; width: 120px; height: 120px; animation-duration: 22s; opacity: 0.4;} /* Smaller for mobile */
+        .shape3 { top: 20%; right: 25%; width: 60px; height: 60px; animation-duration: 16s; animation-delay: 2s; opacity: 0.3;} /* Smaller for mobile */
+        .shape4 { bottom: 25%; left: 15%; width: 100px; height: 100px; animation-duration: 20s; animation-delay: 1s; opacity: 0.45;} /* Smaller for mobile */
+
+        @media (min-width: 768px) { /* md breakpoint - restore original sizes for larger screens */
+            .shape1 { width: 120px; height: 120px; opacity: 0.6;}
+            .shape2 { width: 180px; height: 180px; opacity: 0.5;}
+            .shape3 { width: 80px; height: 80px; opacity: 0.4;}
+            .shape4 { width: 150px; height: 150px; opacity: 0.55;}
+        }
+
+
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) translateX(15px) rotate(180deg); } /* Reduced movement for mobile */
+            100% { transform: translateY(0px) translateX(0px) rotate(360deg); }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+             @keyframes float {
+                0% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+                50% { transform: translateY(-30px) translateX(20px) rotate(180deg); }
+                100% { transform: translateY(0px) translateX(0px) rotate(360deg); }
+            }
+        }
+
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+
+    <header class="bg-white/90 backdrop-blur-lg shadow-md sticky top-0 z-[100]">
+        <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center"> <a href="#" class="flex items-center space-x-2 sm:space-x-3 group"> <i class="ph-brain text-3xl sm:text-4xl text-sky-500 group-hover:text-sky-600 transition-colors"></i> <span class="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 group-hover:text-sky-600 transition-colors">AI動向サマリー</span> </a>
+            <nav class="hidden lg:flex space-x-1">
+                <a href="#intro" class="px-4 py-2 rounded-md text-slate-600 hover:bg-sky-100 hover:text-sky-600 font-medium transition-all duration-200">はじめに</a>
+                <a href="#technologies" class="px-4 py-2 rounded-md text-slate-600 hover:bg-sky-100 hover:text-sky-600 font-medium transition-all duration-200">各AI技術</a>
+                <a href="#comparison" class="px-4 py-2 rounded-md text-slate-600 hover:bg-sky-100 hover:text-sky-600 font-medium transition-all duration-200">比較分析</a>
+                <a href="#trends" class="px-4 py-2 rounded-md text-slate-600 hover:bg-sky-100 hover:text-sky-600 font-medium transition-all duration-200">最新動向</a>
+                <a href="#conclusion" class="px-4 py-2 rounded-md text-slate-600 hover:bg-sky-100 hover:text-sky-600 font-medium transition-all duration-200">結論</a>
+            </nav>
+            <button id="mobile-menu-button" class="lg:hidden p-2 rounded-md text-slate-700 hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">
+                <i id="menu-icon" class="ph-list text-2xl sm:text-3xl"></i> </button>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white shadow-xl absolute top-full left-0 right-0 z-50">
+            <a href="#intro" class="mobile-menu-link block px-5 py-3 text-slate-700 hover:bg-sky-50 hover:text-sky-600 border-b border-slate-100 font-medium text-sm sm:text-base">はじめに</a> <a href="#technologies" class="mobile-menu-link block px-5 py-3 text-slate-700 hover:bg-sky-50 hover:text-sky-600 border-b border-slate-100 font-medium text-sm sm:text-base">各AI技術</a>
+            <a href="#comparison" class="mobile-menu-link block px-5 py-3 text-slate-700 hover:bg-sky-50 hover:text-sky-600 border-b border-slate-100 font-medium text-sm sm:text-base">比較分析</a>
+            <a href="#trends" class="mobile-menu-link block px-5 py-3 text-slate-700 hover:bg-sky-50 hover:text-sky-600 border-b border-slate-100 font-medium text-sm sm:text-base">最新動向</a>
+            <a href="#conclusion" class="mobile-menu-link block px-5 py-3 text-slate-700 hover:bg-sky-50 hover:text-sky-600 font-medium text-sm sm:text-base">結論</a>
+        </div>
+    </header>
+
+    <section class="hero-gradient text-white py-20 sm:py-24 md:py-32 relative overflow-hidden min-h-[70vh] sm:min-h-[75vh] flex flex-col justify-center"> <div class="decorative-shape shape1"></div>
+        <div class="decorative-shape shape2"></div>
+        <div class="decorative-shape shape3"></div>
+        <div class="decorative-shape shape4"></div>
+        
+        <div class="container mx-auto px-4 sm:px-6 text-center relative z-10">
+            <h1 id="hero-title" class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8 leading-tight">
+                </h1> <p id="hero-subtitle" class="hero-subtitle text-base sm:text-lg md:text-xl lg:text-2xl max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-3xl mx-auto mb-8 sm:mb-12 opacity-90 leading-relaxed"> 進化し続けるAIの世界へようこそ。本サマリーでは、注目のAI技術を厳選し、その活用法、利便性、そして未来への展望を、分かりやすく紐解きます。
+            </p>
+            <div id="scroll-down-container" class="mt-12 sm:mt-16"> <i id="hero-scroll-icon" class="ph-mouse-simple text-4xl sm:text-5xl scroll-down-icon opacity-0 text-white/70 hover:text-white transition-colors duration-300"></i> </div>
+        </div>
+    </section>
+
+    <div class="container mx-auto px-4 py-12 lg:py-16 lg:flex lg:space-x-12"> <aside class="hidden lg:block w-72 xl:w-80 flex-shrink-0 sticky top-28 self-start max-h-[calc(100vh-8rem)] overflow-y-auto toc">
+            <h3 class="font-serif text-xl md:text-2xl font-semibold mt-1 mb-4 md:mb-5 px-3 md:px-4 text-indigo-700">目次</h3> <ul class="space-y-1 text-sm md:text-base"> <li><a href="#intro" class="toc-link"><i class="ph-flag toc-icon"></i>はじめに</a></li>
+                <li>
+                    <a href="#technologies" class="toc-link"><i class="ph-robot toc-icon"></i>各AI技術</a>
+                    <ul class="ml-5 md:ml-7 mt-1 md:mt-1.5 space-y-0.5 md:space-y-1 border-l-2 border-slate-200 pl-3 md:pl-4"> <li><a href="#claude" class="toc-link text-xs sm:text-sm"><i class="ph-microphone toc-icon text-base md:text-lg"></i>Claude 音声モード</a></li>
+                        <li><a href="#manus" class="toc-link text-xs sm:text-sm"><i class="ph-slideshow toc-icon text-base md:text-lg"></i>Manus AI スライド</a></li>
+                        <li><a href="#gemini" class="toc-link text-xs sm:text-sm"><i class="ph-radio toc-icon text-base md:text-lg"></i>Gemini 音声概要</a></li>
+                        <li><a href="#plamo" class="toc-link text-xs sm:text-sm"><i class="ph-translate toc-icon text-base md:text-lg"></i>PLaMo翻訳</a></li>
+                    </ul>
+                </li>
+                <li><a href="#comparison" class="toc-link"><i class="ph-scales toc-icon"></i>横断的な比較と分析</a></li>
+                <li><a href="#trends" class="toc-link"><i class="ph-chart-line-up toc-icon"></i>AI技術の最新動向</a></li>
+                <li><a href="#conclusion" class="toc-link"><i class="ph-rocket-launch toc-icon"></i>結論と今後の展望</a></li>
+            </ul>
+        </aside>
+
+        <main class="flex-grow max-w-none lg:max-w-4xl mx-auto prose-custom mt-8 lg:mt-0">
+            <section id="intro" class="mb-16 sm:mb-20 md:mb-24 scroll-mt-24 card p-6 md:p-10 scroll-reveal"> <h2 class="section-title-underline">1. はじめに</h2>
+                <p>
+                    本レポートは、AI技術の進化がもたらす利便性に着目し、具体的な4つのAI技術（Anthropic社 Claude音声モード、Manus AIスライド作成機能、Google Gemini Deep Research音声概要、Preferred Networks社 PLaMo翻訳）について、その使い方と実用的な価値を事実に基づいて解説するものです。これらの技術は、私たちのコミュニケーション、情報作成、調査、そして言語の壁を乗り越える方法に、具体的な変化をもたらし始めています。本サマリーを通じて、これらのAIがどのように役立つのか、その具体的な活用方法とメリットをご紹介します。
+                </p>
+            </section>
+
+            <section id="technologies" class="mb-16 sm:mb-20 md:mb-24 scroll-mt-24"> <h2 class="section-title-underline">2. 各AI技術の使い方と便利さ</h2>
+
+                <article id="claude" class="mb-12 md:mb-16 p-6 md:p-10 card scroll-mt-24 relative scroll-reveal"> <i class="ph-microphone card-icon-bg"></i>
+                    <div class="card-content">
+                        <h3>2.1. Anthropic社 Claude 音声モード</h3>
+                        <p class="text-indigo-600 font-semibold text-base sm:text-lg mb-4 md:mb-6">話しかけるだけでAIがアシスト</p> <p><strong class="text-slate-800">核心機能：</strong> スマートフォンアプリ（iOS/Android）を通じて、Claude AIとリアルタイムで音声会話ができる機能です（ベータ版）。</p>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">利用するまでのステップ：</h4> <ol class="list-decimal list-inside space-y-2 sm:space-y-2.5 pl-1">
+                                <li>アプリのダウンロードとインストール。</li>
+                                <li>アカウント作成またはログイン。</li>
+                                <li>音声モードの有効化（マイクアクセス許可）。</li>
+                                <li>好みの音声を選択（5種類）。</li>
+                                <li>マイクアイコンをタップして会話開始。</li>
+                            </ol>
+                        </div>
+                        <div>
+                             <h4 class="font-semibold mt-4 mb-2">使い方と便利さ：</h4> <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>ハンズフリー操作で情報検索、アイデア出し、文章作成指示が可能。</li>
+                                <li>5種類の個性的な音声で自然な対話体験。</li>
+                                <li>会話の重要ポイントが画面表示され、聞き逃し防止。トランスクリプトや要約も確認可能。</li>
+                                <li>音声入力とテキスト入力の柔軟な切り替え。</li>
+                                <li>Google Workspace連携（有料版）でGmail要約やカレンダー操作などが音声で可能。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">こんなユーザーにとって便利：</h4> <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>移動中や作業中にマルチタスクを効率化したい方。</li>
+                                <li>タイピングより会話が得意な方、自然なAI対話を求める方。</li>
+                                <li>Google Workspaceを音声でさらに活用したいビジネスパーソンや学生。</li>
+                            </ul>
+                        </div>
+                        <div class="callout-box">
+                            <h4><i class="ph-warning-octagon-fill"></i>現状のポイント</h4>
+                            <ul>
+                                <li>音声対応は現在英語のみ（今後の多言語対応に期待）。</li>
+                                <li>モバイルアプリ限定の機能です。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="manus" class="mb-12 md:mb-16 p-6 md:p-10 card scroll-mt-24 relative scroll-reveal"> <i class="ph-slideshow card-icon-bg"></i>
+                    <div class="card-content">
+                        <h3>2.2. Manus AI スライド作成機能</h3>
+                        <p class="text-indigo-600 font-semibold text-base sm:text-lg mb-4 md:mb-6">アイデアを即座にスライド資料へ</p>
+                        <p><strong class="text-slate-800">核心機能：</strong> 簡単な指示（プロンプト）だけで、AIが構造化されたプレゼンテーションスライドを自動作成する機能です。</p>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">利用するまでのステップ：</h4>
+                            <ol class="list-decimal list-inside space-y-2 sm:space-y-2.5 pl-1">
+                                <li>Manus AI公式サイトへアクセスし、アカウント作成・ログイン。</li>
+                                <li>利用クレジットを確認（無料トライアルまたは購入）。</li>
+                                <li>「Manus Slides」機能を選択。</li>
+                                <li>スライドのテーマ、目的、枚数などをテキストで具体的に指示。</li>
+                                <li>AI生成後、内容を確認し、必要に応じて編集・調整。</li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">使い方と便利さ：</h4>
+                            <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>資料作成時間を大幅短縮：構成、内容提案、初期デザインまでAIが自動化。</li>
+                                <li>多様な情報をスライド化：既存文書（PDF、CSV等）やウェブサイトURLからも作成可能。</li>
+                                <li>対話しながらカスタマイズ：チャット形式での追加指示により、内容をさらに洗練。</li>
+                                <li>使い慣れた形式で出力：PowerPointやPDF形式でエクスポート可能。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">こんなユーザーにとって便利：</h4>
+                            <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>プレゼン資料を頻繁に作成するビジネスパーソン、教育関係者。</li>
+                                <li>アイデアを資料化する時間がない、または苦手意識がある方。</li>
+                                <li>複雑な情報やデータを分かりやすく整理・伝達したいコンサルタント、研究者。</li>
+                            </ul>
+                        </div>
+                         <div class="callout-box">
+                            <h4><i class="ph-warning-octagon-fill"></i>現状のポイント</h4>
+                            <ul>
+                                <li>AI生成スライドはあくまで「初稿」。人間の手による確認・修正が推奨されます。</li>
+                                <li>利用にはクレジットが必要。複雑なスライド作成は相応のクレジットを消費します。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="gemini" class="mb-12 md:mb-16 p-6 md:p-10 card scroll-mt-24 relative scroll-reveal"> <i class="ph-radio card-icon-bg"></i>
+                    <div class="card-content">
+                        <h3>2.3. Google Gemini Deep Research 音声概要</h3>
+                        <p class="text-indigo-600 font-semibold text-base sm:text-lg mb-4 md:mb-6">複雑な調査レポートを耳で聞いて理解</p>
+                        <p><strong class="text-slate-800">核心機能：</strong> AIが作成した詳細な調査レポートの内容を、ラジオ番組風の会話形式の音声で聴ける機能です。</p>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">利用するまでのステップ：</h4>
+                            <ol class="list-decimal list-inside space-y-2 sm:space-y-2.5 pl-1">
+                                <li>Geminiアプリ（ウェブ/モバイル）にアクセス、Googleアカウントでログイン。</li>
+                                <li>Deep Researchを実行し、調査レポートを作成。</li>
+                                <li>レポート画面から「音声概要を生成」オプションを選択。</li>
+                                <li>生成完了（通常3～5分）を待ち、再生ボタンで聴取。</li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">使い方と便利さ：</h4>
+                            <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>「ながら聞き」で効率的に情報収集（通勤中、運動中など）。</li>
+                                <li>2人のAIホストによる対話形式で、複雑な内容も理解しやすく解説。</li>
+                                <li>作成された音声概要は公開リンクで共有可能、音声ファイルとしてダウンロードも（モバイル）。</li>
+                                <li>ユーザーが編集可能な調査計画に基づいた結果を音声で手軽に確認。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">こんなユーザーにとって便利：</h4>
+                            <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>新しいトピックの概要を迅速に把握したい研究者、アナリスト。</li>
+                                <li>長文レポートを読む時間がないが、要点は押さえたい多忙なビジネスパーソン。</li>
+                                <li>視覚情報より聴覚情報の方が学習しやすい方。</li>
+                            </ul>
+                        </div>
+                        <div class="callout-box">
+                            <h4><i class="ph-warning-octagon-fill"></i>現状のポイント</h4>
+                            <ul>
+                                <li>音声概要の言語は現在英語のみ（今後の日本語音声対応に期待）。</li>
+                                <li>Gemini Advanced（有料プラン）ユーザー向け機能である可能性が高いです。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+
+                <article id="plamo" class="mb-12 md:mb-16 p-6 md:p-10 card scroll-mt-24 relative scroll-reveal"> <i class="ph-translate card-icon-bg"></i>
+                    <div class="card-content">
+                        <h3>2.4. Preferred Networks社 PLaMo翻訳</h3>
+                        <p class="text-indigo-600 font-semibold text-base sm:text-lg mb-4 md:mb-6">日本語のニュアンスを的確に翻訳</p>
+                         <p><strong class="text-slate-800">核心機能：</strong> 日本語と英語間の翻訳に特化した、Preferred Networks開発の高性能翻訳モデル（LLM）です。</p>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">利用するまでのステップ：</h4>
+                            <ol class="list-decimal list-inside space-y-2.5 sm:space-y-3 pl-1">
+                                <li>
+                                    <strong>A) 専用サイトでの試用：</strong>
+                                    <ul class="list-disc list-inside space-y-1 sm:space-y-1.5 pl-4 sm:pl-6 mt-1 marker:text-slate-400">
+                                        <li>PLaMo翻訳の専用試用サイトにアクセス。</li>
+                                        <li>翻訳したいテキストを入力（文字数制限あり）。</li>
+                                        <li>翻訳実行し、結果を確認。</li>
+                                    </ul>
+                                </li>
+                                <li class="mt-2 sm:mt-2.5">
+                                    <strong>B) オンプレミス/ローカルPCでの利用（PLaMoコミュニティライセンス）：</strong>
+                                     <ul class="list-disc list-inside space-y-1 sm:space-y-1.5 pl-4 sm:pl-6 mt-1 marker:text-slate-400">
+                                        <li>PFN公式サイトでライセンス条件確認と事前登録。</li>
+                                        <li>Hugging Faceリポジトリからモデルをダウンロード。</li>
+                                        <li>実行環境（GPU搭載PC/サーバー、Python等）を準備・インストール。</li>
+                                        <li>ローカル環境でモデルを実行し翻訳処理。</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">使い方と便利さ：</h4>
+                            <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>自然で高品質な日本語⇔英語翻訳：日本語特有のニュアンスや敬語表現も的確に理解。</li>
+                                <li>文書のフォーマットを維持：プログラムコードやMarkdown形式、論文レイアウト等を保ったまま翻訳。</li>
+                                <li>セキュリティ重視の環境でも利用可能：オンプレミスやローカル環境で動作するため機密情報も安全。</li>
+                                <li>コストを抑えた導入も：条件付きで無償商用利用可能な「PLaMoコミュニティライセンス」提供。</li>
+                                <li>試用サイトで手軽に体験：誰でも無料でPLaMo翻訳の性能を試用可能（文字数制限あり）。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mt-4 mb-2">こんなユーザーにとって便利：</h4>
+                            <ul class="list-disc list-inside space-y-2 sm:space-y-2.5 marker:text-sky-500 pl-1">
+                                <li>海外とのメールや文書のやり取りが多いビジネスパーソン。</li>
+                                <li>ソフトウェアドキュメントや技術論文を翻訳する必要がある開発者、研究者。</li>
+                                <li>翻訳精度だけでなく情報セキュリティも重視したい企業や組織。</li>
+                                <li>翻訳コストを抑えつつ高品質な翻訳ツールを利用したい中小企業や個人。</li>
+                            </ul>
+                        </div>
+                        <div class="callout-box">
+                            <h4><i class="ph-warning-octagon-fill"></i>現状のポイント</h4>
+                            <ul>
+                                <li>主に日本語と英語の翻訳に強み（その他の言語への対応は限定的）。</li>
+                                <li>システム連携などに活用できるAPIは将来的に提供予定（詳細は未公開）。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="comparison" class="mb-16 sm:mb-20 md:mb-24 scroll-mt-24 card p-6 md:p-10 scroll-reveal"> <h2 class="section-title-underline">3. 横断的な比較と分析</h2>
+                <div class="overflow-x-auto table-container mt-8 md:mt-10 -mx-4 md:-mx-6 rounded-lg shadow-sm"> <table class="min-w-full">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="text-left">項目</th>
+                                <th class="text-left">Claude音声モード</th>
+                                <th class="text-left">Manus Slides</th>
+                                <th class="text-left">Gemini音声概要</th>
+                                <th class="text-left">PLaMo翻訳</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200"> <tr>
+                                <td class="font-semibold">主機能</td>
+                                <td>AIとの音声会話</td>
+                                <td>プロンプトからのスライド自動生成</td>
+                                <td>調査レポートの音声要約</td>
+                                <td>高精度な日英・英日翻訳</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">入力</td>
+                                <td>音声、テキスト、画像、ドキュメント</td>
+                                <td>テキストプロンプト、ファイル、URL</td>
+                                <td>Deep Researchレポート</td>
+                                <td>テキスト、ドキュメント</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">出力</td>
+                                <td>音声、テキスト（画面表示、要約）</td>
+                                <td>PowerPoint、PDF</td>
+                                <td>音声（ポッドキャスト風MP3）</td>
+                                <td>テキスト（原文形式維持）</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">基盤技術</td>
+                                <td>LLM (Claude Sonnet 4)</td>
+                                <td>マルチエージェント、複数LLM</td>
+                                <td>LLM (Gemini 2.5)</td>
+                                <td>LLM (PLaMo)</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">特化/汎用</td>
+                                <td>汎用AIの音声インターフェース</td>
+                                <td>プレゼンテーション生成特化</td>
+                                <td>リサーチ支援の音声出力</td>
+                                <td>日本語翻訳特化</td>
+                            </tr>
+                             <tr>
+                                <td class="font-semibold">言語対応</td>
+                                <td>英語のみ（音声）</td>
+                                <td>プロンプトは多言語対応可能性</td>
+                                <td>音声出力は英語のみ</td>
+                                <td>日英特化</td>
+                            </tr>
+                            <tr>
+                                <td class="font-semibold">主な利点</td>
+                                <td>ハンズフリー、自然対話、生産性連携</td>
+                                <td>資料作成時間短縮、複雑タスク対応</td>
+                                <td>「ながら聞き」情報収集、理解促進</td>
+                                <td>自然な日本語、形式維持、セキュリティ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="trends" class="mb-16 sm:mb-20 md:mb-24 scroll-mt-24 card p-6 md:p-10 scroll-reveal"> <h2 class="section-title-underline">4. AI技術の最新動向と考察</h2>
+                <p class="mt-8 md:mt-10 mb-6 md:mb-8 text-base sm:text-lg">これらの4つの技術は、AIが私たちの日常や仕事にどのように役立つかを示す良い例であり、AI分野全体の重要なトレンドを反映しています。</p> <div class="grid sm:grid-cols-2 gap-x-6 md:gap-x-10 gap-y-6 md:gap-y-8"> <div class="flex items-start p-3 sm:p-4 rounded-lg hover:bg-sky-50 transition-colors">
+                        <i class="ph-chat-bubbles text-3xl sm:text-4xl text-sky-500 mr-3 sm:mr-5 mt-1 flex-shrink-0"></i> <div>
+                            <strong class="text-lg sm:text-xl font-semibold block mb-1 sm:mb-1.5 text-slate-800">より自然なAIとの対話</strong> <p class="text-slate-600 leading-relaxed text-sm sm:text-base">音声操作やマルチモーダル対応が進み、特別な知識なしにAIの恩恵を受けやすくなっています。</p> </div>
+                    </div>
+                    <div class="flex items-start p-3 sm:p-4 rounded-lg hover:bg-sky-50 transition-colors">
+                        <i class="ph-medal text-3xl sm:text-4xl text-sky-500 mr-3 sm:mr-5 mt-1 flex-shrink-0"></i>
+                        <div>
+                            <strong class="text-lg sm:text-xl font-semibold block mb-1 sm:mb-1.5 text-slate-800">専門分野への特化</strong>
+                            <p class="text-slate-600 leading-relaxed text-sm sm:text-base">特定作業や分野に特化したAIが登場。より質の高い実用的なサポートが期待できます。</p>
+                        </div>
+                    </div>
+                     <div class="flex items-start p-3 sm:p-4 rounded-lg hover:bg-sky-50 transition-colors">
+                        <i class="ph-atom text-3xl sm:text-4xl text-sky-500 mr-3 sm:mr-5 mt-1 flex-shrink-0"></i>
+                        <div>
+                            <strong class="text-lg sm:text-xl font-semibold block mb-1 sm:mb-1.5 text-slate-800">複雑作業の自動化</strong>
+                            <p class="text-slate-600 leading-relaxed text-sm sm:text-base">情報収集、資料作成、翻訳などをAIが肩代わりし、創造的な活動に集中できます。</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 sm:p-4 rounded-lg hover:bg-sky-50 transition-colors">
+                        <i class="ph-lock-key text-3xl sm:text-4xl text-sky-500 mr-3 sm:mr-5 mt-1 flex-shrink-0"></i>
+                        <div>
+                            <strong class="text-lg sm:text-xl font-semibold block mb-1 sm:mb-1.5 text-slate-800">国産AIとセキュリティ</strong>
+                            <p class="text-slate-600 leading-relaxed text-sm sm:text-base">日本語特性を理解した国産AIや、オンプレミスで安全に使えるAIが増えています。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="conclusion" class="mb-12 md:mb-16 scroll-mt-24 card p-6 md:p-10 scroll-reveal"> <h2 class="section-title-underline">5. 結論と今後の展望</h2>
+                <div class="space-y-5 md:space-y-6 mt-8 md:mt-10"> <p>今回ご紹介した4つのAI技術は、それぞれ異なる使い方や便利さを提供しながらも、共通して「人間とAIがより自然に、そして効率的に協力し合う未来」を目指していると言えます。音声で直感的に操作できること、専門的な作業を高い精度でこなせること、そして私たちの文化や環境に合わせたサポートを提供できることは、これからのAI開発においてますます重要になるでしょう。</p>
+                    <p>私たちは、これらのAI技術の特性をよく理解し、自分の目的や状況に合わせて賢く使いこなしていくことが大切です。AI技術の進化は非常に速く、今日抱えている課題（例えば、対応言語の少なさやコストの問題、出力の完璧さなど）も、そう遠くない未来には解決されているかもしれません。</p>
+                    <p>今後、これらのAI技術はさらに進化し、互いに連携することで、個別のツールとしてだけでなく、私たちの仕事や生活のあらゆる場面で、なくてはならない強力なパートナーとなっていくことでしょう。</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="bg-slate-900 text-slate-300 py-12 sm:py-16 text-center"> <div class="container mx-auto px-6">
+            <a href="#" class="flex items-center justify-center space-x-2 sm:space-x-3 group mb-6 sm:mb-8"> <i class="ph-brain text-3xl sm:text-4xl text-sky-400 group-hover:text-sky-300 transition-colors"></i>
+                <span class="font-serif text-2xl sm:text-3xl font-bold text-slate-100 group-hover:text-sky-300 transition-colors">AI動向サマリー</span>
+            </a>
+            <div class="flex justify-center mb-6 sm:mb-8 space-x-5 sm:space-x-6"> <a href="#" aria-label="Facebook" class="text-slate-400 hover:text-sky-400 transition-colors"><i class="ph-facebook-logo text-2xl sm:text-3xl"></i></a> <a href="#" aria-label="Twitter" class="text-slate-400 hover:text-sky-400 transition-colors"><i class="ph-twitter-logo text-2xl sm:text-3xl"></i></a>
+                <a href="#" aria-label="LinkedIn" class="text-slate-400 hover:text-sky-400 transition-colors"><i class="ph-linkedin-logo text-2xl sm:text-3xl"></i></a>
+                <a href="#" aria-label="GitHub" class="text-slate-400 hover:text-sky-400 transition-colors"><i class="ph-github-logo text-2xl sm:text-3xl"></i></a>
+            </div>
+            <p class="text-xs sm:text-sm">&copy; <span id="currentYear"></span> AI技術動向調査サマリー. All rights reserved.</p> <p class="text-xs mt-1 sm:mt-2 text-slate-500">このページはデモンストレーション目的で作成されました。</p> </div>
+    </footer>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        // Mobile menu toggle functionality
+        if (mobileMenuButton && mobileMenu && menuIcon) {
+            mobileMenuButton.addEventListener('click', () => {
+                const isHidden = mobileMenu.classList.toggle('hidden');
+                if (isHidden) {
+                    menuIcon.classList.remove('ph-x');
+                    menuIcon.classList.add('ph-list');
+                } else {
+                    menuIcon.classList.remove('ph-list');
+                    menuIcon.classList.add('ph-x');
+                }
+            });
+            // Close mobile menu when a link is clicked
+            const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    menuIcon.classList.remove('ph-x');
+                    menuIcon.classList.add('ph-list');
+                });
+            });
+        }
+
+        const header = document.querySelector('header');
+        // Calculate header offset for smooth scrolling, considering sticky header
+        const headerOffset = header ? header.offsetHeight + 24 : 90; 
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const sections = document.querySelectorAll('main section[id]');
+        const heroScrollIcon = document.getElementById('hero-scroll-icon');
+
+        // Hero Text Animation
+        const heroTitleElement = document.getElementById('hero-title');
+        const heroSubtitleElement = document.getElementById('hero-subtitle');
+        const textToType = "AI技術の最前線。";
+        let charIndex = 0;
+
+        function typeHeroText() {
+            if (charIndex < textToType.length) {
+                heroTitleElement.innerHTML += textToType.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeHeroText, 100 + Math.random() * 50); // Slightly faster typing
+            } else {
+                if (heroSubtitleElement) heroSubtitleElement.classList.add('visible');
+                if (heroScrollIcon) heroScrollIcon.classList.add('visible');
+            }
+        }
+        
+        if (heroTitleElement) {
+            heroTitleElement.innerHTML = ''; 
+            setTimeout(typeHeroText, 300); // Start typing a bit sooner
+        } else if (heroSubtitleElement) {
+            heroSubtitleElement.classList.add('visible');
+        }
+
+        // Smooth scroll for hero scroll icon
+        if (heroScrollIcon) {
+            heroScrollIcon.addEventListener('click', () => {
+                const introSection = document.getElementById('intro');
+                if (introSection) {
+                    const elementPosition = introSection.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                }
+            });
+        }
+
+        // Smooth scroll for Table of Contents links
+        tocLinks.forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                }
+            });
+        });
+        
+        // Activate ToC link based on scroll position
+        const activateTocLink = () => {
+            let currentSectionId = '';
+            const viewportCenter = window.scrollY + (window.innerHeight / 3); // Check against upper third of viewport
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - headerOffset; // Adjust for sticky header
+                const sectionBottom = sectionTop + section.offsetHeight;
+                
+                if (viewportCenter >= sectionTop && viewportCenter < sectionBottom) {
+                    currentSectionId = section.id;
+                }
+            });
+            
+            // If no section is in the upper third, check if the top of a section is visible
+            if (!currentSectionId && sections.length > 0) {
+                 for (let section of sections) {
+                    const sectionTop = section.offsetTop - headerOffset;
+                    if (window.scrollY + headerOffset >= sectionTop - section.offsetHeight * 0.2 && window.scrollY + headerOffset < sectionTop + section.offsetHeight * 0.8) { // More lenient check
+                        currentSectionId = section.id;
+                        break;
+                    }
+                }
+            }
+
+
+            // If scrolled to the very bottom, activate the last section
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50 && sections.length > 0) { 
+                currentSectionId = sections[sections.length - 1].id;
+            }
+
+
+            tocLinks.forEach(link => {
+                link.classList.remove('toc-active');
+                if (link.getAttribute('href') === `#${currentSectionId}`) {
+                    link.classList.add('toc-active');
+                }
+            });
+        };
+        
+        // Scroll reveal animation for elements
+        const scrollRevealElements = document.querySelectorAll('.scroll-reveal');
+        const revealObserverOptions = { root: null, rootMargin: '0px', threshold: 0.1 }; // Lower threshold for earlier reveal
+
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target); // Stop observing once visible
+                }
+            });
+        }, revealObserverOptions);
+
+        scrollRevealElements.forEach(el => {
+            revealObserver.observe(el);
+        });
+
+        // Debounce scroll event for ToC activation
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(activateTocLink, 50); 
+        }, { passive: true }); 
+        
+        // Initial calls on page load
+        activateTocLink();
+        scrollRevealElements.forEach(el => {
+            if (el.getBoundingClientRect().top < window.innerHeight && el.getBoundingClientRect().bottom > 0) {
+                 el.classList.add('is-visible');
+                 revealObserver.unobserve(el);
+            }
+        });
+
+    </script>
+</body>
+</html>
